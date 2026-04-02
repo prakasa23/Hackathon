@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix My City | Premium Urban Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #05070a;
+            --accent: #00f2ff;
+            --card-bg: #1e293b;
+            --text-dim: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background-color: var(--bg); 
+            color: white; 
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- WINDOW 1: THE REPAIR SHOP ANIMATION --- */
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at center, #111827 0%, #05070a 100%);
+            perspective: 1000px;
+        }
+
+        .title-container { position: relative; display: flex; gap: 10px; z-index: 10; }
+
+        .letter {
+            display: inline-block;
+            font-family: 'Russo One', sans-serif;
+            font-size: clamp(2.5rem, 10vw, 6rem);
+            color: #333; 
+            filter: sepia(1) saturate(2) contrast(0.8);
+            transform: translateY(30px) rotate(15deg) skewX(10deg);
+            opacity: 0.8;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Tools */
+        .tool-icon { position: absolute; font-size: 5rem; z-index: 50; opacity: 0; pointer-events: none; }
+        .hammer { color: #cbd5e1; top: -150px; left: 45%; }
+        .bolt { color: var(--accent); top: 50%; right: 10%; filter: drop-shadow(0 0 20px var(--accent)); }
+        .water-wave {
+            position: absolute; top: 0; left: -100%; width: 150%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.3), #fff, rgba(0, 242, 255, 0.3), transparent);
+            z-index: 60; pointer-events: none; filter: blur(20px);
+        }
+
+        /* Animation Timings */
+        @keyframes hammerStrike { 0% { opacity: 1; transform: translateY(0); } 30% { transform: translateY(180px) rotate(-90deg); } 100% { opacity: 0; } }
+        @keyframes boltZap { 0%, 100% { opacity: 0; transform: scale(0); } 20%, 80% { opacity: 1; transform: scale(1.5); } }
+        @keyframes waveSlide { 0% { left: -150%; } 100% { left: 150%; } }
+
+        .snap-fix .letter { transform: translateY(0) rotate(0deg) skewX(0deg); opacity: 1; color: #555; }
+        .brighten .letter { color: #fff; text-shadow: 0 0 10px var(--accent), 0 0 40px var(--accent); }
+        .clean .letter { filter: sepia(0) saturate(1) contrast(1.2); color: white; text-shadow: 0 10px 20px rgba(0, 242, 255, 0.4); }
+
+        .hero-content { margin-top: 40px; text-align: center; opacity: 0; transform: translateY(20px); transition: 1s ease-out 6s; }
+        .btn-start { background: var(--accent); color: #000; padding: 15px 40px; text-decoration: none; font-weight: 800; border-radius: 4px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); }
+
+        /* --- WINDOW 2: DASHBOARD --- */
+        .window-2 { min-height: 100vh; padding: 80px 5%; background: #0f172a; }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto 80px;
+        }
+
+        .opt-card {
+            padding: 50px 20px; border-radius: 30px; text-align: center;
+            text-decoration: none; transition: 0.4s;
+        }
+        .opt-card:hover { transform: translateY(-10px); filter: brightness(1.1); }
+        .opt-card i { font-size: 50px; margin-bottom: 20px; }
+        .opt-card span { display: block; font-weight: 700; font-size: 1.3rem; }
+
+        /* Pastel Colors from your Image */
+        .pothole { background: #fee2e2; color: #991b1b; }
+        .garbage { background: #dcfce7; color: #166534; }
+        .light { background: #fef9c3; color: #854d0e; }
+        .drainage { background: #dbeafe; color: #1e40af; }
+
+        /* Relevant Content Section */
+        .civic-about {
+            max-width: 1100px; margin: 0 auto;
+            display: flex; align-items: center; gap: 50px;
+            background: var(--card-bg); padding: 40px; border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+            flex-wrap: wrap;
+        }
+        .civic-about img { flex: 1; min-width: 320px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .about-text { flex: 1.2; min-width: 300px; }
+        .about-text h2 { font-size: 2.2rem; color: var(--accent); margin-bottom: 20px; }
+        .about-text p { color: var(--text-dim); line-height: 1.8; margin-bottom: 15px; }
+
+        /* Camera Shake for hammer hit */
+        .shake { animation: shakeEffect 0.2s 1.3s; }
+        @keyframes shakeEffect { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(5px, 5px); } 75% { transform: translate(-5px, -5px); } }
+    </style>
+</head>
+<body id="body">
+
+    <!-- WINDOW 1 -->
+    <div class="hero-section">
+        <i class="fa-solid fa-hammer tool-icon hammer" id="hammerIcon"></i>
+        <i class="fa-solid fa-bolt tool-icon bolt" id="boltIcon"></i>
+        <div class="water-wave" id="waterWave"></div>
+
+        <div class="title-container" id="titleGroup">
+            <span class="letter">F</span><span class="letter">I</span><span class="letter">X</span>
+            <span class="letter" style="margin-left: 20px;">M</span><span class="letter">Y</span>
+            <span class="letter" style="margin-left: 20px;">C</span><span class="letter">I</span><span class="letter">T</span><span class="letter">Y</span>
+        </div>
+
+        <div class="hero-content" id="heroContent">
+            <p style="color: #94a3b8; font-size: 1.2rem;">Official Infrastructure Restoration Portal</p>
+            <br>
+            <a href="#dashboard" class="btn-start">Access Dashboard</a>
+        </div>
+    </div>
+
+    <!-- WINDOW 2 -->
+    <div class="window-2" id="dashboard">
+        <div class="options-grid">
+            <a href="report.html?type=Pothole" class="opt-card pothole">
+                <i class="fa-solid fa-road"></i>
+                <span>Potholes</span>
+            </a>
+            <a href="report.html?type=Garbage" class="opt-card garbage">
+                <i class="fa-solid fa-trash-can"></i>
+                <span>Waste</span>
+            </a>
+            <a href="report.html?type=Street Light" class="opt-card light">
+                <i class="fa-solid fa-lightbulb"></i>
+                <span>Lighting</span>
+            </a>
+            <a href="report.html?type=Drainage" class="opt-card drainage">
+                <i class="fa-solid fa-droplet"></i>
+                <span>Drainage</span>
+            </a>
+        </div>
+
+        <div class="civic-about">
+            <div class="about-text">
+                <h2>Rebuilding Tamil Nadu</h2>
+                <p>Every report you file is a step toward a safer city. Our municipal maintenance crews use this real-time data to prioritize repairs across Madurai, Chennai, and beyond.</p>
+                <p>By providing visual evidence and exact GPS locations, you ensure that civic issues are addressed with transparency and speed. Join thousands of citizens in making our urban spaces functional again.</p>
+            </div>
+            <!-- Relevant Picture of civic issues/reporting -->
+            <img src="civi .jpeg" alt="City Infrastructure Work">
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const titleGroup = document.getElementById('titleGroup');
+            const hammer = document.getElementById('hammerIcon');
+            const bolt = document.getElementById('boltIcon');
+            const wave = document.getElementById('waterWave');
+            const body = document.getElementById('body');
+            const content = document.getElementById('heroContent');
+
+            setTimeout(() => { hammer.style.animation = "hammerStrike 1s forwards"; }, 1000);
+            setTimeout(() => { body.classList.add('shake'); titleGroup.classList.add('snap-fix'); }, 1300);
+            setTimeout(() => { bolt.style.animation = "boltZap 1s forwards"; titleGroup.classList.add('brighten'); }, 3000);
+            setTimeout(() => { wave.style.animation = "waveSlide 1.5s ease-in-out forwards"; }, 5000);
+            setTimeout(() => { titleGroup.classList.remove('brighten'); titleGroup.classList.add('clean'); content.style.opacity = "1"; content.style.transform = "translateY(0)"; }, 5700);
+        });
+    </script>
+</body>
+</html>
