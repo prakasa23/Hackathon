@@ -2,53 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fix My City | Premium Urban Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fix My City | App</title>
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root { --bg: #05070a; --accent: #00f2ff; --card: #1e293b; --text-dim: #94a3b8; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg); color: white; font-family: 'Poppins', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg); color: white; font-family: 'Poppins', sans-serif; overflow-x: hidden; width: 100%; }
 
         .hero-section {
             height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: linear-gradient(rgba(5, 7, 10, 0.6), rgba(5, 7, 10, 0.8)), 
-                        url('https://images.unsplash.com/photo-1590059536065-9856a596001a?q=80&w=2000&auto=format&fit=crop');
-            background-size: cover; background-position: center; perspective: 1000px;
+            background: linear-gradient(rgba(5, 7, 10, 0.7), rgba(5, 7, 10, 0.85)), 
+                        url('https://images.unsplash.com/photo-1590059536065-9856a596001a?q=80&w=1000&auto=format&fit=crop');
+            background-size: cover; background-position: center; perspective: 1000px; padding: 20px;
         }
 
-        .title-container { position: relative; display: flex; gap: 8px; z-index: 10; }
+        .title-container { position: relative; display: flex; gap: 5px; z-index: 10; width: 100%; justify-content: center; }
         .letter {
-            display: inline-block; font-family: 'Russo One', sans-serif; font-size: clamp(2.5rem, 10vw, 6.5rem);
+            display: inline-block; font-family: 'Russo One', sans-serif; 
+            font-size: clamp(1.8rem, 8vw, 4rem);
             color: #333; filter: sepia(1) saturate(3) contrast(0.8); 
-            transform: translateY(40px) rotate(20deg) skewX(15deg); opacity: 0.7;
+            transform: translateY(30px) rotate(20deg) skewX(15deg); opacity: 0.7;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .tool-icon { position: absolute; font-size: 5rem; z-index: 50; opacity: 0; pointer-events: none; }
-        .hammer { color: #cbd5e1; top: -150px; left: 45%; }
-        .bolt { color: var(--accent); top: 50%; right: 10%; }
-        .water-wave { position: absolute; top: 0; left: -100%; width: 150%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.4), #fff, rgba(0, 242, 255, 0.4), transparent); z-index: 60; pointer-events: none; filter: blur(30px); }
+        .tool-icon { position: absolute; font-size: 4rem; z-index: 50; opacity: 0; pointer-events: none; }
+        .hammer { color: #cbd5e1; top: -100px; left: 40%; }
+        .bolt { color: var(--accent); top: 40%; right: 5%; }
+        .water-wave { position: absolute; top: 0; left: -100%; width: 200%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.4), #fff, rgba(0, 242, 255, 0.4), transparent); z-index: 60; pointer-events: none; filter: blur(25px); }
 
-        @keyframes hammerStrike { 0% { opacity: 1; transform: translateY(0); } 40% { transform: translateY(200px) rotate(-90deg); } 100% { opacity: 0; } }
-        @keyframes boltZap { 0%, 100% { opacity: 0; transform: scale(0); } 50% { opacity: 1; transform: scale(1.8); } }
-        @keyframes waveSlide { 0% { left: -150%; } 100% { left: 150%; } }
+        @keyframes hammerStrike { 0% { opacity: 1; transform: translateY(0); } 40% { transform: translateY(150px) rotate(-90deg); } 100% { opacity: 0; } }
+        @keyframes boltZap { 0%, 100% { opacity: 0; transform: scale(0); } 50% { opacity: 1; transform: scale(1.5); } }
+        @keyframes waveSlide { 0% { left: -200%; } 100% { left: 100%; } }
 
         .snap-fix .letter { transform: translateY(0) rotate(0deg) skewX(0deg); opacity: 1; color: #555; }
         .brighten .letter { color: #fff; text-shadow: 0 0 15px var(--accent); }
-        .clean .letter { filter: sepia(0); color: white; text-shadow: 0 10px 25px rgba(0, 242, 255, 0.5); }
+        .clean .letter { filter: sepia(0); color: white; text-shadow: 0 5px 15px rgba(0, 242, 255, 0.5); }
 
-        .hero-content { margin-top: 40px; text-align: center; opacity: 0; transform: translateY(20px); transition: 0.8s ease-out; }
-        .btn-start { background: var(--accent); color: #000; padding: 15px 40px; text-decoration: none; font-weight: 800; border-radius: 8px; display: inline-block; }
+        .hero-content { margin-top: 30px; text-align: center; opacity: 0; transform: translateY(20px); transition: 0.8s ease-out; width: 90%; }
+        .btn-start { background: var(--accent); color: #000; padding: 15px 30px; text-decoration: none; font-weight: 800; border-radius: 12px; display: inline-block; font-size: 0.9rem; }
 
-        .window-2 { min-height: 100vh; padding: 80px 5%; background: #0f172a; }
-        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; max-width: 1300px; margin: 0 auto 50px; }
-        .opt-card { padding: 60px 20px; border-radius: 40px; text-align: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
-        .opt-card:hover { transform: translateY(-10px); filter: brightness(1.1); }
-        .opt-card i { font-size: 65px; margin-bottom: 25px; }
-        .opt-card span { font-weight: 700; font-size: 1.6rem; }
+        .window-2 { min-height: 100vh; padding: 40px 15px; background: #0f172a; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-bottom: 40px; }
+        .opt-card { padding: 30px 10px; border-radius: 25px; text-align: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
+        .opt-card i { font-size: 40px; margin-bottom: 15px; }
+        .opt-card span { font-weight: 700; font-size: 1rem; }
+        .map-view { grid-column: span 2; padding: 25px; }
 
         .pothole { background: #fee2e2; color: #991b1b; }
         .garbage { background: #dcfce7; color: #166534; }
@@ -56,10 +57,11 @@
         .drainage { background: #dbeafe; color: #1e40af; }
         .map-view { background: #e0e7ff; color: #3730a3; }
         
-        .map-section-container { max-width: 1200px; margin: 0 auto; background: var(--card); padding: 25px; border-radius: 30px; display: none; }
-        #map { height: 550px; width: 100%; border-radius: 20px; border: 1px solid #334155; margin-top: 15px; }
+        .map-section-container { width: 100%; background: var(--card); padding: 15px; border-radius: 25px; display: none; margin-top: 20px; }
+        #map { height: 350px; width: 100%; border-radius: 20px; border: 1px solid #334155; margin-top: 10px; }
+        
         .shake { animation: camShake 0.15s; }
-        @keyframes camShake { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(5px,5px); } }
+        @keyframes camShake { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(3px,3px); } }
     </style>
 </head>
 <body id="body">
@@ -69,11 +71,11 @@
         <div class="water-wave" id="waterWave"></div>
         <div class="title-container" id="titleGroup">
             <span class="letter">F</span><span class="letter">I</span><span class="letter">X</span>
-            <span class="letter" style="margin-left: 20px;">M</span><span class="letter">Y</span>
-            <span class="letter" style="margin-left: 20px;">C</span><span class="letter">I</span><span class="letter">T</span><span class="letter">Y</span>
+            <span class="letter" style="margin-left: 10px;">M</span><span class="letter">Y</span>
+            <span class="letter" style="margin-left: 10px;">C</span><span class="letter">I</span><span class="letter">T</span><span class="letter">Y</span>
         </div>
         <div class="hero-content" id="heroContent">
-            <p style="color: #cbd5e1; font-size: 1.2rem;">Official Infrastructure Command</p><br>
+            <p style="color: #cbd5e1; font-size: 1rem;">Infrastructure Command</p><br>
             <a href="#dashboard" class="btn-start">Access Dashboard</a>
         </div>
     </div>
@@ -88,8 +90,8 @@
         </div>
         <div class="map-section-container" id="mapSection">
             <div style="display:flex; justify-content: space-between; align-items:center;">
-                <h3>Nearby Awareness (10km)</h3>
-                <div style="display:flex; gap:15px; font-size: 0.8rem;">
+                <h3 style="font-size:0.9rem;">Nearby Issues</h3>
+                <div style="display:flex; gap:8px; font-size: 0.7rem;">
                     <span><i class="fa-solid fa-circle" style="color:#ef4444"></i> Pending</span>
                     <span><i class="fa-solid fa-circle" style="color:#22c55e"></i> Solved</span>
                 </div>
@@ -105,7 +107,6 @@
                   b = document.getElementById('boltIcon'), w = document.getElementById('waterWave'),
                   c = document.getElementById('heroContent'), bd = document.getElementById('body');
 
-            // ANIMATION SPEED REDUCED SLIGHTLY FOR PREMIUM FEEL
             setTimeout(() => { h.style.animation = "hammerStrike 0.8s forwards"; }, 600);
             setTimeout(() => { bd.classList.add('shake'); tg.classList.add('snap-fix'); }, 1000);
             setTimeout(() => { b.style.animation = "boltZap 0.7s forwards"; tg.classList.add('brighten'); }, 1800);
@@ -123,15 +124,15 @@
                     const {latitude: lat, longitude: lng} = pos.coords;
                     map.setView([lat, lng], 13);
                     L.circle([lat, lng], {radius: 10000, color: '#00f2ff', fillOpacity: 0.1}).addTo(map);
-                    L.marker([lat, lng]).addTo(map).bindPopup("You are here").openPopup();
+                    L.marker([lat, lng]).addTo(map);
                     
                     const issueTypes = ["Pothole", "Waste Leak", "Broken Lamp", "Flooded Drain"];
-                    for(let i=0; i<10; i++) {
+                    for(let i=0; i<8; i++) {
                         let isSolved = Math.random() > 0.5;
                         let type = issueTypes[Math.floor(Math.random() * issueTypes.length)];
                         L.circleMarker([lat + (Math.random()-0.5)*0.1, lng + (Math.random()-0.5)*0.1], {
-                            radius: 9, fillColor: isSolved ? '#22c55e' : '#ef4444', color: '#fff', weight: 2, fillOpacity: 1
-                        }).addTo(map).bindPopup(`<strong>${type}</strong><br>Status: ${isSolved ? 'Solved' : 'Pending'}`);
+                            radius: 7, fillColor: isSolved ? '#22c55e' : '#ef4444', color: '#fff', weight: 1, fillOpacity: 1
+                        }).addTo(map).bindPopup(`<strong>${type}</strong><br>${isSolved ? 'Solved' : 'Pending'}`);
                     }
                 });
             }
