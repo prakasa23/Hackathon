@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Management</title>
+    <style>
+        body { background: #05070a; color: white; font-family: sans-serif; padding: 15px; }
+        .card { background: #1e293b; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #334155; }
+        .badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
+        .pending { background: #ef4444; } .solved { background: #22c55e; }
+        img { width: 100%; border-radius: 10px; margin-top: 10px; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
+        button { padding: 10px; border-radius: 8px; border: none; font-weight: bold; font-size: 0.7rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h1>Manager</h1>
+        <a href="index.html" style="color: #ef4444;">Logout</a>
+    </div>
+    <div id="list"></div>
+
+    <script>
+        if(sessionStorage.getItem('isAdmin') !== 'true') window.location.href = "admin-login.html";
+
+        function render() {
+            const db = JSON.parse(localStorage.getItem('fixCityDB')) || [];
+            const list = document.getElementById('list');
+            list.innerHTML = "";
+            db.forEach(r => {
+                const card = document.createElement('div');
+                card.className = "card";
+                card.innerHTML = `
+                    <span class="badge ${r.status.toLowerCase()}">${r.status}</span>
+                    <h3 style="margin:5px 0">${r.type}</h3>
+                    <p style="font-size:0.8rem; color:#94a3b8">${r.location}</p>
+                    <p style="font-size:0.85rem">${r.description}</p>
+                    ${r.image ? `<img src="${r.image}">` : ''}
+                    <div class="controls">
+                        <button style="background:#22c55e; color:white" onclick="toggle(${r.id})">Status</button>
+                        <button style="background:#fbbf24; color:black" onclick="edit(${r.id})">Modify</button>
+                        <button style="background:#ef4444; color:white" onclick="del(${r.id})">Delete</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function toggle(id) {
+            let db = JSON.parse(localStorage.getItem('fixCityDB'));
+            db = db.map(i => { if(i.id===id) i.status = i.status==="Pending"?"Solved":"Pending"; return i; });
+            localStorage.setItem('fixCityDB', JSON.stringify(db));
+            render();
+        }
+
+        function edit(id) {
+            let db = JSON.parse(localStorage.getItem('fixCityDB'));
+            let item = db.find(i => i.id === id);
+            let nLoc = prompt("Edit Location:", item.location);
+            let nDesc = prompt("Edit Description:", item.description);
+            if(nLoc !== null && nDesc !== null) {
+                item.location = nLoc; item.description = nDesc;
+                localStorage.setItem('fixCityDB', JSON.stringify(db));
+                render();
+            }
+        }
+
+        function del(id) {
+            let db = JSON.parse(localStorage.getItem('fixCityDB'));
+            db = db.filter(i => i.id !== id);
+            localStorage.setItem('fixCityDB', JSON.stringify(db));
+            render();
+        }
+        render();
+    </script>
+</body>
+</html>

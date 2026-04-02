@@ -8,99 +8,59 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #05070a; color: white; padding: 15px; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Poppins', sans-serif; background: #05070a; color: white; padding: 15px; }
         .report-window { width: 100%; background: #1e293b; padding: 25px 20px; border-radius: 25px; border: 1px solid #334155; }
         .badge { background: #00f2ff; color: #000; padding: 4px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; margin-bottom: 10px; display: inline-block; }
-        h1 { font-size: 1.4rem; margin-bottom: 15px; }
-        label { font-size: 0.85rem; color: #94a3b8; }
-        .btn-tool { background: #334155; color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; width: 100%; margin: 8px 0; font-size: 0.9rem; }
-        input, textarea { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; background: #05070a; color: white; border: 1px solid #334155; font-size: 0.9rem; }
-        .cam-box { width: 100%; height: 250px; background: #000; border-radius: 15px; display: none; position: relative; margin-top: 10px; overflow: hidden; }
+        .btn-tool { background: #334155; color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; width: 100%; margin: 8px 0; }
+        input, textarea { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; background: #05070a; color: white; border: 1px solid #334155; }
+        #reportMap { height: 250px; width: 100%; border-radius: 15px; margin-top: 15px; border: 1px solid #334155; }
+        .btn-submit { width: 100%; padding: 16px; background: #00f2ff; color: #000; border: none; border-radius: 12px; font-weight: bold; margin-top: 20px; }
+        .cam-box { width: 100%; height: 200px; background: #000; border-radius: 15px; display: none; overflow: hidden; position: relative; margin-top: 10px; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        .snap-btn { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: #00f2ff; color: #000; border: none; padding: 8px 18px; border-radius: 20px; font-weight: bold; }
+        .snap-btn { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: #00f2ff; color: #000; padding: 8px 20px; border-radius: 20px; border: none; font-weight: bold; }
         .preview { width: 100%; border-radius: 12px; display: none; margin-top: 10px; }
-        .btn-submit { width: 100%; padding: 16px; background: #00f2ff; color: #000; border: none; border-radius: 12px; font-weight: bold; margin-top: 20px; font-size: 1rem; }
-        
-        .nearby-section { width: 100%; margin: 25px auto; background: #1e293b; padding: 20px; border-radius: 25px; border: 1px solid #334155; }
-        #reportMap { height: 300px; width: 100%; border-radius: 15px; margin-top: 10px; }
-        .map-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
     </style>
 </head>
 <body>
-
     <div class="report-window">
         <div class="badge" id="typeTag">Issue</div>
         <h1>Log Incident</h1>
-        
         <label>1. Location</label>
-        <button class="btn-tool" onclick="getGPS()"><i class="fa-solid fa-location-dot"></i> Live GPS</button>
-        <input type="text" id="locInp" placeholder="Address...">
+        <button class="btn-tool" onclick="getGPS()"><i class="fa-solid fa-location-dot"></i> Get Live GPS</button>
+        <input type="text" id="locInp" placeholder="Address bar...">
 
-        <label style="display:block; margin-top:15px;">2. Photos</label>
-        <button class="btn-tool" onclick="startCam()"><i class="fa-solid fa-camera"></i> Take Photo</button>
+        <label style="display:block; margin-top:15px;">2. Visual Evidence</label>
+        <button class="btn-tool" onclick="startCam()"><i class="fa-solid fa-camera"></i> Open Camera</button>
         <div class="cam-box" id="camWrap">
             <video id="video" autoplay playsinline></video>
             <button class="snap-btn" onclick="snap()">SNAP</button>
         </div>
         <img id="preview" class="preview">
 
-        <label style="display:block; margin-top:15px;">3. Description</label>
-        <textarea rows="3" placeholder="Specific details..."></textarea>
+        <label style="display:block; margin-top:15px;">3. Details</label>
+        <textarea id="descInp" rows="3" placeholder="Description..."></textarea>
         
-        <button class="btn-submit" onclick="alert('Submitted!')">Submit Report</button>
+        <button class="btn-submit" onclick="submitReport()">Submit Report</button>
     </div>
 
-    <div class="nearby-section">
-        <h3 style="font-size:1rem;"><i class="fa-solid fa-map-location-dot"></i> Nearby Awareness</h3>
-        <div class="map-legend">
-            <div class="legend-item"><div class="dot" style="background: #ef4444;"></div> Pending</div>
-            <div class="legend-item"><div class="dot" style="background: #22c55e;"></div> Solved</div>
-        </div>
-        <div id="reportMap"></div>
-    </div>
+    <div id="reportMap"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const type = new URLSearchParams(window.location.search).get('type');
-        document.getElementById('typeTag').innerText = type || "Civic Issue";
+        const type = new URLSearchParams(window.location.search).get('type') || "Issue";
+        document.getElementById('typeTag').innerText = type;
+        let capturedImage = "";
+        let coords = { lat: 0, lng: 0 };
 
-        // Improved Location Function
         async function getGPS() {
-            const locField = document.getElementById('locInp');
-            // Show "Accessing location..." inside the entry bar immediately
-            locField.value = "Accessing location..."; 
-
-            const geoOptions = {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            };
-
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-
-                try {
-                    // Fetch address from OpenStreetMap API
-                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`, {
-                        headers: { 'Accept-Language': 'en' }
-                    });
-                    const data = await response.json();
-                    
-                    if (data && data.display_name) {
-                        locField.value = data.display_name;
-                    } else {
-                        // Fallback to raw coordinates if geocoding fails
-                        locField.value = `Coords: ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-                    }
-                } catch (err) {
-                    locField.value = `Coords: ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-                }
-            }, (err) => {
-                locField.value = "GPS Error: " + err.message;
-            }, geoOptions);
+            const field = document.getElementById('locInp');
+            field.value = "Accessing location...";
+            navigator.geolocation.getCurrentPosition(async pos => {
+                coords.lat = pos.coords.latitude; coords.lng = pos.coords.longitude;
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`);
+                const data = await res.json();
+                field.value = data.display_name;
+            }, () => { field.value = "GPS Error"; }, {enableHighAccuracy: true});
         }
 
         let stream;
@@ -109,34 +69,44 @@
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             document.getElementById('video').srcObject = stream;
         }
+
         function snap() {
             const v = document.getElementById('video'), p = document.getElementById('preview'), c = document.createElement('canvas');
             c.width = v.videoWidth; c.height = v.videoHeight;
             c.getContext('2d').drawImage(v,0,0);
-            p.src = c.toDataURL('image/png'); p.style.display = 'block';
+            capturedImage = c.toDataURL('image/webp');
+            p.src = capturedImage; p.style.display = 'block';
             document.getElementById('camWrap').style.display = 'none';
             stream.getTracks().forEach(t => t.stop());
+        }
+
+        function submitReport() {
+            const report = {
+                id: Date.now(),
+                type: type,
+                location: document.getElementById('locInp').value,
+                description: document.getElementById('descInp').value,
+                image: capturedImage,
+                status: "Pending",
+                lat: coords.lat,
+                lng: coords.lng,
+                date: new Date().toLocaleDateString()
+            };
+            let db = JSON.parse(localStorage.getItem('fixCityDB')) || [];
+            db.unshift(report);
+            localStorage.setItem('fixCityDB', JSON.stringify(db));
+            alert("Sent to DB!");
+            window.location.href = "index.html";
         }
 
         window.onload = () => {
             const map = L.map('reportMap').setView([13.0827, 80.2707], 13);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
             navigator.geolocation.getCurrentPosition(pos => {
-                const {latitude: lt, longitude: lg} = pos.coords;
-                map.setView([lt, lg], 13);
-                L.circle([lt, lg], {radius: 10000, color: '#00f2ff', weight: 1, fillOpacity: 0.1}).addTo(map);
-                L.marker([lt, lg]).addTo(map);
-                
-                const issueTypes = ["Drainage Leak", "Broken Lamp", "Pothole", "Waste Leak"];
-                for(let i=0; i<6; i++) {
-                    let isSolved = i % 2 === 0;
-                    let issue = issueTypes[Math.floor(Math.random() * issueTypes.length)];
-                    L.circleMarker([lt+(Math.random()-0.5)*0.1, lg+(Math.random()-0.5)*0.1], {
-                        radius: 7, fillColor: isSolved ? '#22c55e' : '#ef4444', color:'#fff', weight: 1, fillOpacity: 1
-                    }).addTo(map).bindPopup(`${issue}: ${isSolved ? 'Solved' : 'Pending'}`);
-                }
+                map.setView([pos.coords.latitude, pos.coords.longitude], 13);
+                L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map).bindPopup("You are here");
             });
-        };
+        }
     </script>
 </body>
 </html>

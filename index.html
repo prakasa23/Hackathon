@@ -11,6 +11,7 @@
         :root { --bg: #05070a; --accent: #00f2ff; --card: #1e293b; --text-dim: #94a3b8; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg); color: white; font-family: 'Poppins', sans-serif; overflow-x: hidden; width: 100%; }
+        .admin-link { position: absolute; top: 20px; right: 20px; z-index: 100; color: white; font-size: 1.5rem; opacity: 0.3; }
 
         .hero-section {
             height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -21,8 +22,7 @@
 
         .title-container { position: relative; display: flex; gap: 5px; z-index: 10; width: 100%; justify-content: center; }
         .letter {
-            display: inline-block; font-family: 'Russo One', sans-serif; 
-            font-size: clamp(1.8rem, 8vw, 4rem);
+            display: inline-block; font-family: 'Russo One', sans-serif; font-size: clamp(1.8rem, 8vw, 4rem);
             color: #333; filter: sepia(1) saturate(3) contrast(0.8); 
             transform: translateY(30px) rotate(20deg) skewX(15deg); opacity: 0.7;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -49,22 +49,22 @@
         .opt-card { padding: 30px 10px; border-radius: 25px; text-align: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
         .opt-card i { font-size: 40px; margin-bottom: 15px; }
         .opt-card span { font-weight: 700; font-size: 1rem; }
-        .map-view { grid-column: span 2; padding: 25px; }
+        .map-view { grid-column: span 2; padding: 25px; background: #e0e7ff; color: #3730a3; }
 
         .pothole { background: #fee2e2; color: #991b1b; }
         .garbage { background: #dcfce7; color: #166534; }
         .light { background: #fef9c3; color: #854d0e; }
         .drainage { background: #dbeafe; color: #1e40af; }
-        .map-view { background: #e0e7ff; color: #3730a3; }
         
         .map-section-container { width: 100%; background: var(--card); padding: 15px; border-radius: 25px; display: none; margin-top: 20px; }
         #map { height: 350px; width: 100%; border-radius: 20px; border: 1px solid #334155; margin-top: 10px; }
-        
         .shake { animation: camShake 0.15s; }
         @keyframes camShake { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(3px,3px); } }
     </style>
 </head>
 <body id="body">
+    <a href="admin-login.html" class="admin-link"><i class="fa-solid fa-user-shield"></i></a>
+
     <div class="hero-section">
         <i class="fa-solid fa-hammer tool-icon hammer" id="hammerIcon"></i>
         <i class="fa-solid fa-bolt tool-icon bolt" id="boltIcon"></i>
@@ -75,7 +75,7 @@
             <span class="letter" style="margin-left: 10px;">C</span><span class="letter">I</span><span class="letter">T</span><span class="letter">Y</span>
         </div>
         <div class="hero-content" id="heroContent">
-            <p style="color: #cbd5e1; font-size: 1rem;">Infrastructure Command</p><br>
+            <p style="color: #cbd5e1; font-size: 1rem;">Digital Infrastructure Command</p><br>
             <a href="#dashboard" class="btn-start">Access Dashboard</a>
         </div>
     </div>
@@ -86,22 +86,27 @@
             <a href="report.html?type=Garbage" class="opt-card garbage"><i class="fa-solid fa-trash-can"></i><span>Waste</span></a>
             <a href="report.html?type=Street Light" class="opt-card light"><i class="fa-solid fa-lightbulb"></i><span>Lighting</span></a>
             <a href="report.html?type=Drainage" class="opt-card drainage"><i class="fa-solid fa-droplet"></i><span>Drainage</span></a>
-            <a href="javascript:void(0)" class="opt-card map-view" onclick="activateMap()"><i class="fa-solid fa-map-location-dot"></i><span>Nearby Map</span></a>
+            <a href="javascript:void(0)" class="opt-card map-view" onclick="activateMap()"><i class="fa-solid fa-map-location-dot"></i><span>Madurai Mock Data + Live GPS Map</span></a>
         </div>
         <div class="map-section-container" id="mapSection">
-            <div style="display:flex; justify-content: space-between; align-items:center;">
-                <h3 style="font-size:0.9rem;">Nearby Issues</h3>
-                <div style="display:flex; gap:8px; font-size: 0.7rem;">
-                    <span><i class="fa-solid fa-circle" style="color:#ef4444"></i> Pending</span>
-                    <span><i class="fa-solid fa-circle" style="color:#22c55e"></i> Solved</span>
-                </div>
-            </div>
+            <h3 style="font-size:0.9rem;">Surrounding Awareness (10km)</h3>
             <div id="map"></div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // SEED DATABASE WITH MADURAI DATA ON FIRST LOAD
+        window.onload = () => {
+            if(!localStorage.getItem('fixCityDB')) {
+                const maduraiDefaults = [
+                    { id: 1, type: "Pothole", location: "Meenakshi Amman West Tower, Madurai", description: "Deep hole causing bike skidding.", status: "Pending", lat: 9.9195, lng: 78.1139, date: "25/05/2024" },
+                    { id: 2, type: "Street Light", location: "Goripalayam Junction, Madurai", description: "All lights off for 3 days.", status: "Solved", lat: 9.9320, lng: 78.1250, date: "24/05/2024" }
+                ];
+                localStorage.setItem('fixCityDB', JSON.stringify(maduraiDefaults));
+            }
+        };
+
         window.addEventListener('load', () => {
             const tg = document.getElementById('titleGroup'), h = document.getElementById('hammerIcon'), 
                   b = document.getElementById('boltIcon'), w = document.getElementById('waterWave'),
@@ -118,22 +123,23 @@
         function activateMap() {
             document.getElementById('mapSection').style.display = "block";
             if (!map) {
-                map = L.map('map').setView([13.0827, 80.2707], 13);
+                map = L.map('map').setView([13.0827, 80.2707], 13); // Default view
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+                
+                // LIVE GPS LOCATION
                 navigator.geolocation.getCurrentPosition(pos => {
                     const {latitude: lat, longitude: lng} = pos.coords;
                     map.setView([lat, lng], 13);
                     L.circle([lat, lng], {radius: 10000, color: '#00f2ff', fillOpacity: 0.1}).addTo(map);
-                    L.marker([lat, lng]).addTo(map);
-                    
-                    const issueTypes = ["Pothole", "Waste Leak", "Broken Lamp", "Flooded Drain"];
-                    for(let i=0; i<8; i++) {
-                        let isSolved = Math.random() > 0.5;
-                        let type = issueTypes[Math.floor(Math.random() * issueTypes.length)];
-                        L.circleMarker([lat + (Math.random()-0.5)*0.1, lng + (Math.random()-0.5)*0.1], {
-                            radius: 7, fillColor: isSolved ? '#22c55e' : '#ef4444', color: '#fff', weight: 1, fillOpacity: 1
-                        }).addTo(map).bindPopup(`<strong>${type}</strong><br>${isSolved ? 'Solved' : 'Pending'}`);
-                    }
+                    L.marker([lat, lng]).addTo(map).bindPopup("Your Live Position").openPopup();
+
+                    // Load markers from database (Mock Madurai data will show if user is in TN)
+                    const db = JSON.parse(localStorage.getItem('fixCityDB')) || [];
+                    db.forEach(r => {
+                        const color = r.status === "Solved" ? "#22c55e" : "#ef4444";
+                        L.circleMarker([r.lat, r.lng], {radius:7, fillColor:color, color:'#fff', weight:1, fillOpacity:1}).addTo(map)
+                        .bindPopup(`<strong>${r.type}</strong><br>${r.status}`);
+                    });
                 });
             }
         }
