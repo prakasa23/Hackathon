@@ -3,106 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Center | Fix My City</title>
+    <title>Report Issue | Fix My City</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #05070a; color: white; display: flex; justify-content: center; padding: 30px; }
-        .report-window {
-            max-width: 600px; width: 100%; background: #1e293b; padding: 40px; 
-            border-radius: 35px; border: 1px solid #334155; animation: slideUp 0.8s ease;
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
-        .badge { background: #00f2ff; color: #000; padding: 5px 20px; border-radius: 12px; font-weight: 700; margin-bottom: 20px; display: inline-block; }
-        .form-group { margin-bottom: 25px; position: relative; }
-        label { display: block; margin-bottom: 10px; color: #94a3b8; }
-        input, textarea { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #334155; background: #05070a; color: white; }
-        input:focus { border-color: #00f2ff; outline: none; }
-        .btn-tool { background: #334155; color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; width: 100%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .sug-box { position: absolute; width: 100%; background: white; color: black; border-radius: 12px; z-index: 100; max-height: 200px; overflow-y: auto; display: none; }
-        .sug-box div { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; }
-        .cam-box { width: 100%; height: 320px; background: #000; border-radius: 20px; overflow: hidden; display: none; position: relative; margin-bottom: 15px; border: 2px solid #00f2ff; }
+        body { font-family: 'Poppins', sans-serif; background: #05070a; color: white; padding: 20px; }
+        .report-window { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 30px; border-radius: 30px; border: 1px solid #334155; }
+        .badge { background: #00f2ff; color: #000; padding: 5px 15px; border-radius: 10px; font-weight: 700; margin-bottom: 15px; display: inline-block; }
+        .btn-tool { background: #334155; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; margin: 10px 0; }
+        input, textarea { width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; background: #05070a; color: white; border: 1px solid #334155; }
+        .cam-box { width: 100%; height: 300px; background: #000; border-radius: 20px; display: none; position: relative; margin-top: 10px; overflow: hidden; border: 2px solid #00f2ff; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        .snap { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: #00f2ff; color: #000; padding: 10px 25px; border-radius: 30px; border: none; font-weight: 700; }
-        .preview { width: 100%; border-radius: 20px; display: none; margin-bottom: 15px; border: 2px solid #4ade80; }
-        .btn-submit { width: 100%; padding: 18px; background: #00f2ff; color: #000; border: none; border-radius: 15px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
+        .snap-btn { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: #00f2ff; color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
+        .preview { width: 100%; border-radius: 15px; display: none; margin-top: 10px; }
+        .btn-submit { width: 100%; padding: 18px; background: #00f2ff; color: #000; border: none; border-radius: 10px; font-weight: bold; margin-top: 25px; cursor: pointer; font-size: 1.1rem; }
+        
+        .nearby-section { max-width: 800px; margin: 30px auto; background: #1e293b; padding: 25px; border-radius: 30px; border: 1px solid #334155; }
+        #reportMap { height: 400px; width: 100%; border-radius: 20px; margin-top: 15px; }
+
+        .map-legend {
+            display: flex; gap: 20px; background: #05070a; padding: 10px 20px; 
+            border-radius: 15px; width: fit-content; margin-bottom: 10px; border: 1px solid #334155;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
     </style>
 </head>
 <body>
 
-<div class="report-window">
-    <div class="badge" id="typeTag">Issue</div>
-    <h1>Incident Logging</h1>
-    <p style="color: #94a3b8; margin-bottom: 30px;">Provide accurate location and evidence.</p>
+    <div class="report-window">
+        <div class="badge" id="typeTag">Issue</div>
+        <h1>Lively Incident Logging</h1>
+        
+        <label>1. Location</label>
+        <button class="btn-tool" onclick="getGPS()"><i class="fa-solid fa-location-dot"></i> Detect My Live GPS</button>
+        <input type="text" id="locInp" placeholder="Detecting your address...">
 
-    <div class="form-group">
-        <label>Location Details (Tamil Nadu)</label>
-        <button class="btn-tool" onclick="getGPS()"><i class="fa-solid fa-location-arrow"></i> Get Live GPS Location</button>
-        <input type="text" id="locInp" placeholder="Type area or street name..." oninput="searchTN(this.value)">
-        <div class="sug-box" id="sugBox"></div>
-    </div>
-
-    <div class="form-group">
-        <label>Evidence (Live Camera Capture)</label>
-        <button class="btn-tool" onclick="startCam()"><i class="fa-solid fa-camera"></i> Open Live Camera</button>
+        <label style="display:block; margin-top:20px;">2. Visual Evidence</label>
+        <button class="btn-tool" onclick="startCam()"><i class="fa-solid fa-camera"></i> Open Camera</button>
         <div class="cam-box" id="camWrap">
             <video id="video" autoplay playsinline></video>
-            <button class="snap" onclick="snap()">TAKE PHOTO</button>
+            <button class="snap-btn" onclick="snap()">TAKE PHOTO</button>
         </div>
-        <canvas id="canvas" style="display:none;"></canvas>
         <img id="preview" class="preview">
+
+        <label style="display:block; margin-top:20px;">3. Describe Problem</label>
+        <textarea rows="4" placeholder="Mention street landmarks or specific details..."></textarea>
+        
+        <button class="btn-submit" onclick="alert('Sent to Municipal Authority!')">Submit Official Report</button>
     </div>
 
-    <button class="btn-submit" onclick="alert('Report Filed Successfully!')">Send Official Report</button>
-</div>
+    <div class="nearby-section">
+        <h3><i class="fa-solid fa-map-location-dot"></i> Nearby Awareness (10km)</h3>
+        
+        <div class="map-legend">
+            <div class="legend-item"><div class="dot" style="background: #ef4444;"></div> Pending Issues</div>
+            <div class="legend-item"><div class="dot" style="background: #22c55e;"></div> Solved Issues</div>
+        </div>
 
-<script>
-    const type = new URLSearchParams(window.location.search).get('type');
-    document.getElementById('typeTag').innerText = type || "Civic Issue";
+        <div id="reportMap"></div>
+    </div>
 
-    function getGPS() {
-        const inp = document.getElementById('locInp');
-        inp.placeholder = "Finding GPS...";
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
-            const data = await res.json();
-            inp.value = data.display_name;
-        });
-    }
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const type = new URLSearchParams(window.location.search).get('type');
+        document.getElementById('typeTag').innerText = type || "Civic Issue";
 
-    async function searchTN(q) {
-        const box = document.getElementById('sugBox');
-        if(q.length < 3) { box.style.display = 'none'; return; }
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}, Tamil Nadu&format=json&limit=5`);
-        const data = await res.json();
-        box.innerHTML = '';
-        if(data.length > 0) {
-            box.style.display = 'block';
-            data.forEach(d => {
-                const item = document.createElement('div');
-                item.innerText = d.display_name;
-                item.onclick = () => { document.getElementById('locInp').value = d.display_name; box.style.display = 'none'; };
-                box.appendChild(item);
+        async function getGPS() {
+            navigator.geolocation.getCurrentPosition(async pos => {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
+                const data = await res.json();
+                document.getElementById('locInp').value = data.display_name;
             });
         }
-    }
 
-    let stream;
-    async function startCam() {
-        document.getElementById('camWrap').style.display = 'block';
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        document.getElementById('video').srcObject = stream;
-    }
+        let stream;
+        async function startCam() {
+            document.getElementById('camWrap').style.display = 'block';
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            document.getElementById('video').srcObject = stream;
+        }
+        function snap() {
+            const v = document.getElementById('video'), p = document.getElementById('preview'), c = document.createElement('canvas');
+            c.width = v.videoWidth; c.height = v.videoHeight;
+            c.getContext('2d').drawImage(v,0,0);
+            p.src = c.toDataURL('image/png'); p.style.display = 'block';
+            document.getElementById('camWrap').style.display = 'none';
+            stream.getTracks().forEach(t => t.stop());
+        }
 
-    function snap() {
-        const v = document.getElementById('video'), c = document.getElementById('canvas'), p = document.getElementById('preview');
-        c.width = v.videoWidth; c.height = v.videoHeight;
-        c.getContext('2d').drawImage(v, 0, 0);
-        p.src = c.toDataURL('image/png');
-        p.style.display = 'block';
-        document.getElementById('camWrap').style.display = 'none';
-        stream.getTracks().forEach(t => t.stop());
-    }
-</script>
+        window.onload = () => {
+            const map = L.map('reportMap').setView([13.0827, 80.2707], 13);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+            navigator.geolocation.getCurrentPosition(pos => {
+                const {latitude: lt, longitude: lg} = pos.coords;
+                map.setView([lt, lg], 13);
+                L.circle([lt, lg], {radius: 10000, color: '#00f2ff', fillOpacity: 0.1}).addTo(map);
+                L.marker([lt, lg]).addTo(map).bindPopup("You are here").openPopup();
+                
+                const issueTypes = ["Drainage Leak", "Broken Lamp", "Pothole", "Waste Leak", "Open Manhole"];
+                for(let i=0; i<8; i++) {
+                    let isSolved = i % 2 === 0;
+                    let issue = issueTypes[Math.floor(Math.random() * issueTypes.length)];
+                    L.circleMarker([lt+(Math.random()-0.5)*0.1, lg+(Math.random()-0.5)*0.1], {
+                        radius: 8, 
+                        fillColor: isSolved ? '#22c55e' : '#ef4444', 
+                        color:'#fff', 
+                        weight: 2,
+                        fillOpacity: 1
+                    }).addTo(map).bindPopup(`<strong>${issue}</strong><br>Status: ${isSolved ? 'Solved' : 'Pending'}`);
+                }
+            });
+        };
+    </script>
 </body>
 </html>
